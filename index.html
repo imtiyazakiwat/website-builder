@@ -54,7 +54,7 @@
     <p></p>
     <form id="generate-form">
       <div class="form-group">
-        <label for="user-input">Enter a prompt to generate Website:</label>
+        <label for="user-input">Enter a prompt to generate HTML:</label>
         <textarea class="form-control" id="user-input" rows="5" required></textarea>
       </div>
       <button id="generate-button" type="submit" class="btn btn-primary my-3">Generate Your Website</button>
@@ -123,11 +123,11 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer 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"
+          "Authorization": "Bearer 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"
         },
         body: JSON.stringify({
-          prompt: userInput + ",write beautiful html using bootstrap classes,javascript, use diffrent different images from unsplash(if needed), add navbar, hero section, footer , mobile friendly, write media querry for mobile view, responsive ,js code if wanted',make certain tasks responsively in current page without opening other page (single page application),write all code in single file ',  ",
-          temperature: 0.5,
+          prompt: userInput + ",write beautiful html using bootstrap classes,javascript, use images from unsplash(when needed), add navbar, hero section, footer , mobile friendly, write media querry for mobile view, responsive ,js code if wanted',make certain tasks responsively in current page without opening other pagewrite all code in single file ',  ",
+          temperature: 0.1,
           max_tokens: 2000,
           top_p: 1,
           frequency_penalty: 0,
