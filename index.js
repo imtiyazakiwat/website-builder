@@ -1,93 +1,99 @@
-// const form = document.querySelector("#generate-form");
-// const spinner = document.querySelector("#spinner");
-// const generateButton = document.querySelector("#generate-button");
+document.addEventListener('DOMContentLoaded', () => {
+    // Existing form submission logic
+    const generateForm = document.getElementById('generate-form');
+    const generateButton = document.getElementById('generate-button');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const resultsContainer = document.getElementById('results-container');
+    const promptInput = document.getElementById('prompt-input'); 
 
-// form.addEventListener("submit", async (event) => {
-//   event.preventDefault();
-//   spinner.classList.remove("hidden"); // show the spinner
-//   generateButton.classList.add("hidden"); // hide the generate button
+    if (generateForm && generateButton && loadingIndicator && resultsContainer && promptInput) {
+        const originalButtonText = generateButton.textContent;
 
-//   const userInput = document.querySelector("#user-input").value;
+        generateForm.addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            const userInput = promptInput.value.trim(); 
+            resultsContainer.innerHTML = ''; 
 
-//   // Send request to OpenAI API
-//   const response = await fetch("https://api.openai.com/v1/engines/text-davinci-003/completions", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "Authorization": "Bearer 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"
-//     },
-//     body: JSON.stringify({
-//       prompt: userInput + ",write beautiful html using bootstrap classes, use images from unsplash, add navbar, hero section, footer ",
-//       temperature: 0.7,
-//       max_tokens: 900,
-//       top_p: 1,
-//       frequency_penalty: 0,
-//       presence_penalty: 0
-//     })
-//   });
+            if (userInput === "") {
+                const errorHtml = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Oops!</strong> Please enter a description for the website you want to create.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>`;
+                resultsContainer.innerHTML = errorHtml;
+                return; 
+            }
 
-//   const data = await response.json();
+            loadingIndicator.style.display = 'block'; 
+            generateButton.textContent = 'Generating...';
+            generateButton.disabled = true;
 
-//   // Create link to HTML file
-//   const html = data.choices[0].text;
-//   const file = new Blob([html], {type: "text/html"});
-//   const url = URL.createObjectURL(file);
-//   const link = document.createElement("a");
-//   link.href = url;
-//   link.target = "_blank";
-//   link.innerHTML = "Open your beautifull website";
-//   document.body.appendChild(link);
+            setTimeout(function() {
+                loadingIndicator.style.display = 'none';
+                generateButton.textContent = originalButtonText;
+                generateButton.disabled = false;
+                
+                const mockHtmlPreview = `
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-success"><i class="fas fa-check-circle mr-2"></i>Generation Complete!</h5>
+                            <p class="card-text">A mock preview of the generated website for your prompt: <br><em>"${userInput.substring(0, 150).replace(/</g, "&lt;").replace(/>/g, "&gt;")}..."</em></p>
+                            <a href="#" class="btn btn-success mt-2" 
+                               onclick="alert('This would open the full generated site in a new tab or download it. This is a mock action for demonstration.'); return false;">
+                                <i class="fas fa-external-link-alt mr-2"></i>View Full Site (Mock)
+                            </a>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.innerHTML = mockHtmlPreview;
+            }, 2500); 
+        });
+    } else {
+        console.error("Initialization failed for form elements: One or more form-related DOM elements are missing.");
+        if(resultsContainer) { 
+            resultsContainer.innerHTML = `<div class="alert alert-danger" role="alert">Page form functionality error: Essential elements missing. Please reload.</div>`;
+        }
+    }
 
-//   // Hide the spinner and show the generate button
-//   spinner.classList.add("hidden");
-//   generateButton.classList.remove("hidden");
-// });
+    // --- Light/Dark Mode Theme Toggle Logic ---
+    const themeToggleButton = document.getElementById('theme-toggle'); // This ID will be added to HTML
+    const bodyElement = document.body;
 
-const form = document.querySelector("#generate-form");
-const spinner = document.querySelector("#spinner");
-const container = document.querySelector("#generated-html-container");
-const generateButton = document.querySelector("#generate-button");
+    // Function to apply the saved theme or default to light
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            bodyElement.classList.add('dark-mode');
+            if (themeToggleButton) themeToggleButton.textContent = 'Light Mode'; // Update button text
+        } else {
+            bodyElement.classList.remove('dark-mode');
+            if (themeToggleButton) themeToggleButton.textContent = 'Dark Mode'; // Update button text
+        }
+    }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  spinner.classList.remove("d-none"); // show the spinner
-  generateButton.classList.add("d-none"); // hide the generate button
+    // Load saved theme from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else {
+        applyTheme('light'); // Default to light theme if no preference saved
+    }
 
-  const userInput = document.querySelector("#user-input").value;
-
-  // Send request to OpenAI API
-  const response = await fetch("https://api.openai.com/v1/engines/text-davinci-003/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer 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"
-    },
-    body: JSON.stringify({
-      prompt: userInput + ",write beautiful html using bootstrap classes, use images from unsplash, add navbar, hero section, footer ",
-      temperature: 0.7,
-      max_tokens: 900,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0
-    })
-  });
-
-  const data = await response.json();
-
-  // Create button to open HTML file
-  const html = data.choices[0].text;
-  const file = new Blob([html], {type: "text/html"});
-  const url = URL.createObjectURL(file);
-  const button = document.createElement("button");
-  button.classList.add("btn", "btn-primary");
-  button.innerHTML = "Open website";
-  button.addEventListener("click", () => {
-    window.open(url, "_blank");
-  });
-  container.innerHTML = ""; // clear any previous content in container
-  container.appendChild(button);
-
-  // Hide the spinner and show the generate button
-  spinner.classList.add("d-none");
-  generateButton.classList.remove("d-none");
+    // Event listener for the theme toggle button
+    if (themeToggleButton) {
+        themeToggleButton.addEventListener('click', () => {
+            bodyElement.classList.toggle('dark-mode');
+            let currentTheme;
+            if (bodyElement.classList.contains('dark-mode')) {
+                currentTheme = 'dark';
+            } else {
+                currentTheme = 'light';
+            }
+            localStorage.setItem('theme', currentTheme);
+            applyTheme(currentTheme); // Update button text via applyTheme
+        });
+    } else {
+        console.warn("Theme toggle button (#theme-toggle) not found. Theme switching will not be available.");
+    }
 });

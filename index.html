@@ -1,257 +1,123 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <title>Website Builder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-  <style>
-    /* Add mobile styles */
-    @media only screen and (max-width: 767px) {
-      h1 {
-        font-size: 32px;
-      }
-
-      .form-control {
-        font-size: 16px;
-      }
-
-      .btn {
-        font-size: 20px;
-        padding: 10px 20px;
-      }
-    }
-
-    /*Navbar styles */
-    .navbar {
-      padding: 1rem 2rem;
-    }
-
-    .navbar-brand {
-      font-size: 1.5rem;
-    }
-
-    .nav-link {
-      font-size: 1.2rem;
-      margin-left: 1rem;
-      margin-right: 1rem;
-    }
-
-    .nav-link.active {
-      border-bottom: 2px solid #fff;
-    }
-
-    .navbar-toggler {
-      border: none;
-    }
-
-    @media (max-width: 576px) {
-      .navbar-nav {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .nav-link {
-        margin-left: 0;
-        margin-right: 0;
-        margin-bottom: 0.5rem;
-      }
-    }
-
-    /* Footer styles */
-    footer {
-      background-color: #1A1A1A;
-      font-family: 'Roboto', sans-serif;
-    }
-
-    footer h5 {
-      color: #FFFFFF;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    footer a {
-      color: #828282;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      color: #FFFFFF;
-      text-decoration: none;
-    }
-
-    footer ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
-
-    footer ul li {
-      margin-bottom: 10px;
-    }
-
-    footer i {
-      color: #FFFFFF;
-      margin-right: 10px;
-    }
-
-    footer .fas {
-      color: #FFFFFF;
-    }
-
-    footer .bg-dark {
-      background-color: #1A1A1A !important;
-    }
-
-    footer .container hr {
-      border-top: 1px solid #828282;
-    }
-
-    footer .list-inline-item {
-      margin-right: 15px;
-    }
-
-    footer .list-inline-item:last-child {
-      margin-right: 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMT Website Generator - AI Powered Site Builder</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="index.css">
+    <!-- Font Awesome (loaded async in script, but useful to have a note here) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-
 <body>
-  <nav class="navbar navbar-expand-lg bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">IMT Website Generator</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/about">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/contact">Contact</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled">API pricing</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-  <div class="container my-4">
-    <h1 class="mt-5">Website Builder</h1>
-    <p></p>
-    <form id="generate-form">
-      <div class="form-group">
-        <label for="user-input">Enter a prompt to generate Website:</label>
-        <textarea class="form-control" id="user-input" rows="5" required></textarea>
-      </div>
-      <button id="generate-button" type="submit" class="btn btn-primary my-3">Generate Your Website</button>
-      <div id="spinner" class="spinner-border text-primary d-none" role="status">
-        <span class="sr-only">Loading...</span>
-      </div>
-    </form>
-    <div id="spinner" class="spinner-border text-success mt-5 d-none"></div>
-    <div id="generated-html-container"></div>
-  </div>
-  <footer class="bg-dark text-light py-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 mb-4">
-          <h5>About This App</h5>
-          <p>This app is called "IMT Website Generator". It allows users to input a prompt and generate Website based on
-            that prompt using the OpenAI GPT-3 language model. The generated HTML code can then be used in web
-            development projects. The app also includes a navigation bar, a footer, and Bootstrap CSS to give it a
-            polished look.</p>
+
+    <header class="main-header py-3 bg-dark text-white">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="index.html" class="site-title h3 mb-2 mb-lg-0 text-white text-decoration-none mr-lg-auto">
+                    IMT Website Generator
+                </a>
+
+                <nav class="main-nav">
+                    <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
+                        <li><a href="index.html" class="nav-link px-2 text-white active" aria-current="page">Home</a></li>
+                        <li><a href="about.html" class="nav-link px-2 text-white">About</a></li>
+                        <li><a href="#" class="nav-link px-2 text-white">Pricing</a></li> {/* Pricing page doesn't exist yet */}
+                        <li><a href="contact.html" class="nav-link px-2 text-white">Contact</a></li>
+                    </ul>
+                </nav>
+                <button id="theme-toggle" class="btn btn-sm btn-outline-light ml-lg-3">Dark Mode</button>
+            </div>
         </div>
-        <div class="col-md-4 mb-4">
-          <h5>Quick Links</h5>
-          <ul class="list-unstyled">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Contact Us</a></li>
-          </ul>
+    </header>
+
+    <main class="main-content">
+        <section id="prompt-section" class="prompt-section text-center py-5 bg-light">
+            <div class="container">
+                <h1 class="page-title display-4 mb-3">Build Your Website with AI</h1>
+                <p class="section-subtitle lead mb-5">
+                    Describe the website you want to create, and our AI will generate the HTML for you.
+                </p>
+                <form id="generate-form" class="generate-form col-lg-8 offset-lg-2">
+                    <div class="form-group mb-4">
+                        <label for="prompt-input" class="sr-only">Enter your website description:</label>
+                        <textarea id="prompt-input" name="prompt_input" class="form-control form-control-lg prompt-textarea" rows="6" 
+                                  placeholder="e.g., 'A clean portfolio site for a photographer with a gallery page and contact form.'" required></textarea>
+                    </div>
+                    <button id="generate-button" type="submit" class="btn btn-primary btn-lg generate-button px-5">
+                        Generate Website
+                    </button>
+                </form>
+                <div id="loading-indicator" class="loading-indicator mt-4" style="display:none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">Generating your website, please wait...</p>
+                </div>
+                <div id="results-container" class="results-container mt-5">
+                    <!-- Generated website link or content will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="about-app-section" class="about-app container py-5">
+            <div class="row">
+                <div class="col-md-10 offset-md-1 text-center">
+                    <h2 class="section-title mb-4">About The IMT Website Generator</h2>
+                    <p class="lead">This tool leverages the power of Artificial Intelligence to help you kickstart your web development projects. By simply providing a textual prompt, you can receive a foundational HTML structure, complete with Bootstrap classes for initial styling.</p>
+                    <p>Whether you're a developer looking for a quick start, a designer experimenting with layouts, or someone new to web creation, our generator aims to simplify the initial steps of building a website. The output is designed to be semantic and easily customizable.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer bg-dark text-light pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <h3 class="footer-heading h5">About IMT</h3>
+                    <p class="small text-muted">IMT Website Generator is a project dedicated to exploring AI applications in web development, making website creation more accessible.</p>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4 mb-lg-0 footer-links-column">
+                    <h3 class="footer-heading h5">Quick Links</h3>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="footer-link text-light">Home</a></li>
+                        <li><a href="about.html" class="footer-link text-light">About Us</a></li>
+                        <li><a href="#" class="footer-link text-light">FAQ</a></li> {/* FAQ page doesn't exist yet */}
+                        <li><a href="#" class="footer-link text-light">API Status</a></li> {/* API Status page doesn't exist yet */}
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 footer-contact-column">
+                    <h3 class="footer-heading h5">Contact Us</h3>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-map-marker-alt mr-2"></i> Darur, Athani-591304, Belagavi, Karnataka</li>
+                        <li><i class="fas fa-phone mr-2"></i> +91 8217291743</li>
+                        <li><i class="fas fa-envelope mr-2"></i> <a href="mailto:imtiyazakiwat0@gmail.com" class="footer-link text-light">imtiyazakiwat0@gmail.com</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h3 class="footer-heading h5">Stay Connected</h3>
+                    <p class="small text-muted">Follow us on social media for updates.</p>
+                    {/* Placeholder for social media icons/links */}
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="copyright-notice text-center">
+                <p class="small mb-0">&copy; 2024 IMT Website Generator. All Rights Reserved.</p>
+                <p class="small"><a href="#" class="footer-link text-light">Privacy Policy</a> | <a href="#" class="footer-link text-light">Terms of Use</a></p>
+            </div>
         </div>
-        <div class="col-md-4 mb-4">
-          <h5>Contact Us</h5>
-          <ul class="list-unstyled">
-            <li><i class="fas fa-map-marker-alt"></i> darur , Athani-591304 ,Belgum ,karnataka</li>
-            <li><i class="fas fa-phone"></i> +918217291743</li>
-            <li><i class="fas fa-envelope"></i> imtiyazakiwat0@gmail.com</li>
-          </ul>
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col-md-6">
-          <p>&copy; 2023 IMT. All Rights Reserved.</p>
-        </div>
-        <div class="col-md-6 text-md-right">
-          <ul class="list-inline">
-            <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
-            <li class="list-inline-item"><a href="#">Terms of Use</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </footer>
-  <script>
+    </footer>
 
-    const form = document.querySelector("#generate-form");
-    const spinner = document.querySelector("#spinner");
-    const container = document.querySelector("#generated-html-container");
-    const generateButton = document.querySelector("#generate-button");
+    <!-- Bootstrap JS and Popper.js (for Bootstrap components) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- Font Awesome - if needed for icons (ensure you have a kit or use CDN) -->
+    <!-- Font Awesome - loaded via <link> tag in <head>, but can also be loaded via JS if specific versioning or async is needed -->
+    <!-- <script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script> -->
+    
+    <script src="index.js" defer></script>
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      spinner.classList.remove("d-none"); // show the spinner
-      generateButton.classList.add("d-none"); // hide the generate button
-
-      const userInput = document.querySelector("#user-input").value;
-
-      // Send request to OpenAI API
-      const response = await fetch("https://api.openai.com/v1/engines/text-davinci-003/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // "Authorization": "Bearer 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"
-        },
-        body: JSON.stringify({
-          prompt: userInput + "Create an elegant single-file HTML document using Bootstrap classes, JavaScript, and images from Unsplash when necessary. Incorporate a responsive navbar, hero section, and footer, ensuring that the design is mobile-friendly. Include media queries for optimal mobile view and use JavaScript to perform specific tasks responsively within the current page without navigating to other pages.",
-          temperature: 0.5,
-          max_tokens: 2000,
-          top_p: 1,
-          frequency_penalty: 0,
-          presence_penalty: 0
-        })
-      });
-
-      const data = await response.json();
-
-      // Create button to open HTML file
-      const html = data.choices[0].text;
-      const file = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(file);
-      const button = document.createElement("button");
-      button.classList.add("btn", "btn-primary");
-      button.innerHTML = "Open website";
-      button.addEventListener("click", () => {
-        window.open(url, "_blank");
-      });
-      container.innerHTML = ""; // clear any previous content in container
-      container.appendChild(button);
-
-      // Hide the spinner and show the generate button
-      spinner.classList.add("d-none");
-      generateButton.classList.remove("d-none");
-    });
-
-  </script>
 </body>
-
 </html>

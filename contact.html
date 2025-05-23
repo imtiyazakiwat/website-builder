@@ -1,39 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Form using Netlify and Bootstrap</title>
-    <!-- Bootstrap CSS -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - IMT Website Generator</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-  <body>
-    <div class="container my-4">
-      <h1 class="text-center mb-4">Contact Us</h1>
-      <form method="POST" action="https://formspree.io/f/mvovorln" class="needs-validation" novalidate>
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required>
-          <div class="invalid-feedback">
-            Please enter your name.
-          </div>
+<body>
+
+    <header class="main-header py-3 bg-dark text-white">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="index.html" class="site-title h3 mb-2 mb-lg-0 text-white text-decoration-none mr-lg-auto">
+                    IMT Website Generator
+                </a>
+                <nav class="main-nav">
+                    <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
+                        <li><a href="index.html" class="nav-link px-2 text-white">Home</a></li>
+                        <li><a href="about.html" class="nav-link px-2 text-white">About</a></li>
+                        <li><a href="#" class="nav-link px-2 text-white">Pricing</a></li> {/* Assuming Pricing page doesn't exist yet */}
+                        <li><a href="contact.html" class="nav-link px-2 text-white active" aria-current="page">Contact</a></li>
+                    </ul>
+                </nav>
+                <button id="theme-toggle" class="btn btn-sm btn-outline-light ml-lg-3">Dark Mode</button>
+            </div>
         </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
-          <div class="invalid-feedback">
-            Please enter a valid email address.
-          </div>
+    </header>
+
+    <main class="main-content py-5">
+        <div class="container">
+            <section class="page-title-section text-center mb-5">
+                <h1 class="page-title">Get In Touch</h1>
+                <p class="lead section-subtitle">We'd love to hear from you. Please fill out the form below or use our contact details.</p>
+            </section>
+
+            <div class="row">
+                <section class="col-lg-8 mx-auto contact-form-section mb-5">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4 p-md-5">
+                            <h2 class="section-title h3 text-center mb-4">Send Us a Message</h2>
+                            <form method="POST" action="https://formspree.io/f/mvovorln" class="needs-validation" novalidate>
+                                <div class="form-row">
+                                    <div class="col-md-6 form-group">
+                                        <label for="name">Your Name</label>
+                                        <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="Enter your name" required>
+                                        <div class="invalid-feedback">Please enter your name.</div>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label for="email">Your Email</label>
+                                        <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Enter your email" required>
+                                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subject">Subject</label>
+                                    <input type="text" class="form-control form-control-lg" id="subject" name="subject" placeholder="Subject of your message (Optional)">
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Message</label>
+                                    <textarea class="form-control form-control-lg" id="message" name="message" rows="6" placeholder="Enter your message" required></textarea>
+                                    <div class="invalid-feedback">Please enter your message.</div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg generate-button px-5">Send Message</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="col-lg-10 mx-auto contact-details-section text-center">
+                    <h2 class="section-title h3 mb-4">Our Contact Details</h2>
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="contact-detail-item p-3">
+                                <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                                <h4 class="h6">Address</h4>
+                                <p class="text-muted small">Darur, Athani-591304, Belagavi, Karnataka, India</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="contact-detail-item p-3">
+                                <i class="fas fa-phone fa-2x text-primary mb-2"></i>
+                                <h4 class="h6">Phone</h4>
+                                <p class="text-muted small"><a href="tel:+918217291743" class="text-muted">+91 8217291743</a></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="contact-detail-item p-3">
+                                <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                <h4 class="h6">Email</h4>
+                                <p class="text-muted small"><a href="mailto:imtiyazakiwat0@gmail.com" class="text-muted">imtiyazakiwat0@gmail.com</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
-        <div class="form-group">
-          <label for="message">Message</label>
-          <textarea class="form-control" id="message" name="message" rows="5" placeholder="Enter your message" required></textarea>
-          <div class="invalid-feedback">
-            Please enter your message.
-          </div>
+    </main>
+
+    <footer class="site-footer bg-dark text-light pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <h3 class="footer-heading h5">About IMT</h3>
+                    <p class="small text-muted">IMT Website Generator is a project dedicated to exploring AI applications in web development, making website creation more accessible.</p>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4 mb-lg-0 footer-links-column">
+                    <h3 class="footer-heading h5">Quick Links</h3>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="footer-link text-light">Home</a></li>
+                        <li><a href="about.html" class="footer-link text-light">About Us</a></li>
+                        <li><a href="#" class="footer-link text-light">FAQ</a></li>
+                        <li><a href="#" class="footer-link text-light">API Status</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 footer-contact-column">
+                    <h3 class="footer-heading h5">Contact Us</h3>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-map-marker-alt mr-2"></i> Darur, Athani-591304, Belagavi, Karnataka</li>
+                        <li><i class="fas fa-phone mr-2"></i> +91 8217291743</li>
+                        <li><i class="fas fa-envelope mr-2"></i> <a href="mailto:imtiyazakiwat0@gmail.com" class="footer-link text-light">imtiyazakiwat0@gmail.com</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h3 class="footer-heading h5">Stay Connected</h3>
+                    <p class="small text-muted">Follow us on social media for updates.</p>
+                    {/* Placeholder for social media icons/links */}
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="copyright-notice text-center">
+                <p class="small mb-0">&copy; 2024 IMT Website Generator. All Rights Reserved.</p>
+                <p class="small"><a href="#" class="footer-link text-light">Privacy Policy</a> | <a href="#" class="footer-link text-light">Terms of Use</a></p>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-    </body>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js (for Bootstrap components and validation) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function() {
+          'use strict';
+          window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+              form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+              }, false);
+            });
+          }, false);
+        })();
+    </script>
+
+</body>
 </html>
