@@ -1,6 +1,4 @@
-// WARNING: Storing API keys directly in client-side code is a security risk.
-// This key should ideally be handled via a backend proxy or environment variables in a real application.
-const OPENROUTER_API_KEY = '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';
+// API Key is now handled by the Netlify serverless function.
 
 document.addEventListener('DOMContentLoaded', () => {
     const generateForm = document.getElementById('generate-form');
@@ -45,37 +43,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const fullPrompt = "Generate a complete HTML webpage based on the following prompt. Only output the HTML code, starting with <!DOCTYPE html> and ending with </html>. Do not include any explanatory text or markdown formatting before or after the HTML code. Ensure the HTML is well-formed and uses standard Bootstrap 4 classes for styling where appropriate. Prompt: " + userInput;
 
-        fetch('https://openrouter.ai/api/v1/chat/completions', {
+        // Updated fetch to use the Netlify serverless function
+        fetch('/.netlify/functions/chat', { // New endpoint
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
+                // No Authorization header needed here; Netlify function handles it
             },
-            body: JSON.stringify({
+            body: JSON.stringify({ // Body now contains model and messages for the Netlify function
                 "model": "mistralai/mistral-7b-instruct:free", 
                 "messages": [
                     { "role": "user", "content": fullPrompt }
-                ],
+                ]
             })
         })
         .then(response => {
+            // First, check if the response from the Netlify function itself is okay
             if (!response.ok) {
+                // Try to parse the error body from the Netlify function
                 return response.json().then(errData => {
-                    let errorDetails = JSON.stringify(errData.error || errData);
-                    if (errData.error && errData.error.message) {
+                    // errData could be { error: "message from Netlify func" } or OpenRouter's error structure
+                    let errorDetails = errData.error ? JSON.stringify(errData.error) : JSON.stringify(errData);
+                    if (errData.error && errData.error.message) { // Specifically for OpenRouter like errors passed through
                         errorDetails = errData.error.message;
+                    } else if (typeof errData.error === 'string') { // For simple { error: "message" }
+                         errorDetails = errData.error;
                     }
-                    throw new Error(`API Error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
-                }).catch(() => { // Fallback if parsing error data also fails
-                    throw new Error(`API Error: ${response.status} ${response.statusText}. Could not parse error details.`);
+                    throw new Error(`Server Function Error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
+                }).catch(() => { // Fallback if parsing Netlify's error response fails
+                    throw new Error(`Server Function Error: ${response.status} ${response.statusText}. Could not parse error response.`);
                 });
             }
-            return response.json();
+            return response.json(); // This is the body from the Netlify function, which should be OpenRouter's response
         })
-        .then(data => {
+        .then(data => { // data is now the parsed JSON response from OpenRouter (forwarded by Netlify)
             if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
                 let rawHtml = data.choices[0].message.content;
-                // Clean potential markdown code block fences
                 currentGeneratedHtml = rawHtml.replace(/^```html\s*|```\s*$/g, '').trim();
 
                 resultsContainer.innerHTML = `
@@ -93,15 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-            } else {
-                console.error("Unexpected API response structure:", data);
-                currentGeneratedHtml = null; // Ensure no stale data
-                throw new Error("Unexpected API response structure. Could not find generated content.");
+            } else if (data.error) { // Handle cases where OpenRouter returns an error object within a 200 OK from Netlify
+                console.error("OpenRouter API Error (via Netlify):", data.error);
+                currentGeneratedHtml = null;
+                throw new Error(`OpenRouter API Error: ${data.error.message || JSON.stringify(data.error)}`);
+            }
+            else {
+                console.error("Unexpected API response structure (via Netlify):", data);
+                currentGeneratedHtml = null; 
+                throw new Error("Unexpected API response structure from server. Could not find generated content.");
             }
         })
         .catch(error => {
-            console.error('Error during API call:', error);
-            currentGeneratedHtml = null; // Ensure no stale data
+            console.error('Error during API call via Netlify function:', error);
+            currentGeneratedHtml = null; 
             resultsContainer.innerHTML = `<div class="alert alert-danger" role="alert">Error generating website: ${error.message}</div>`;
         })
         .finally(() => {
@@ -119,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = 'generated_website.html';
-                document.body.appendChild(link); // Required for Firefox
+                document.body.appendChild(link); 
                 link.click();
-                document.body.removeChild(link); // Clean up
-                URL.revokeObjectURL(link.href); // Release the object URL
+                document.body.removeChild(link); 
+                URL.revokeObjectURL(link.href); 
             } else {
                 console.error("No HTML content available to download.");
                 alert("No HTML content available to download. Please generate a website first.");
