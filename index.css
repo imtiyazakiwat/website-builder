@@ -282,17 +282,41 @@ a:hover {
     /* Bootstrap handles disabled styling, can add overrides if needed */
 }
 
-/* Loading Indicator Styling */
-.loading-indicator p { 
-    font-size: 1rem;
-    color: var(--color-text-secondary); /* Uses variable */
-    margin-top: 0.75rem;
+/* New Loading Progress Indicator Styling */
+.loading-progress-container {
+    width: 80%;
+    max-width: 500px; /* Max width for larger screens */
+    margin: 2rem auto; /* Spacing and centering */
+    text-align: center;
+    /* display: none; is handled by inline style in HTML & JS */
 }
-.loading-indicator .spinner-border { /* .text-primary is from Bootstrap */
-    width: 3rem; 
-    height: 3rem;
-    border-width: .25em;
-    color: var(--color-primary) !important; /* Ensure spinner uses theme primary */
+
+#loading-text {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.75rem; /* Space between text and bar */
+}
+
+.progress-bar-animated {
+    width: 100%;
+    height: 20px; /* Height of the progress bar */
+    background-color: var(--color-border); /* Light grey background for the track */
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Important to contain the inner bar */
+    box-shadow: var(--shadow-sm);
+}
+
+.progress-bar-inner {
+    width: 40%; /* Width of the moving part */
+    height: 100%;
+    background-color: var(--color-primary); /* Use primary color */
+    border-radius: inherit; /* Inherit border-radius from parent */
+    animation: indeterminate-progress 2s infinite linear;
+}
+
+@keyframes indeterminate-progress {
+    0% { transform: translateX(-100%); } /* Start off-screen to the left */
+    100% { transform: translateX(250%); } /* End off-screen to the right (40% width means 100/40 = 2.5 times its width) */
 }
 
 /* Results Container Styling */

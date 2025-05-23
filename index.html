@@ -22,7 +22,6 @@
                     <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
                         <li><a href="index.html" class="nav-link px-2 text-white active" aria-current="page">Home</a></li>
                         <li><a href="about.html" class="nav-link px-2 text-white">About</a></li>
-                        <li><a href="#" class="nav-link px-2 text-white">Pricing</a></li> {/* Pricing page doesn't exist yet */}
                         <li><a href="contact.html" class="nav-link px-2 text-white">Contact</a></li>
                     </ul>
                 </nav>
@@ -48,11 +47,11 @@
                         Generate Website
                     </button>
                 </form>
-                <div id="loading-indicator" class="loading-indicator mt-4" style="display:none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
+                <div id="loading-progress-container" class="loading-progress-container mt-4" style="display: none;">
+                    <p id="loading-text" class="mb-2">Generating your website...</p>
+                    <div class="progress-bar-animated">
+                        <div class="progress-bar-inner"></div>
                     </div>
-                    <p class="mt-2">Generating your website, please wait...</p>
                 </div>
                 <div id="results-container" class="results-container mt-5">
                     <!-- Generated website link or content will appear here -->
