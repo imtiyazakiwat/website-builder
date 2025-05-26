@@ -178,6 +178,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Add this function for handling retries with backoff
+    function backoffRetry(fn, retries = 3, delay = 2000, backoffFactor = 2) {
+        let attempt = 0;
+        
+        return new Promise((resolve, reject) => {
+            function attempt() {
+                fn()
+                    .then(resolve)
+                    .catch(error => {
+                        attempt++;
+                        
+                        if (attempt >= retries || error.status !== 429) {
+                            return reject(error);
+                        }
+                        
+                        console.log(`Rate limited. Retry attempt ${attempt} after ${delay}ms`);
+                        setTimeout(attempt, delay);
+                        delay *= backoffFactor; // Exponential backoff
+                    });
+            }
+            
+            attempt();
+        });
+    }
+
     generateForm.addEventListener('submit', function(event) {
         event.preventDefault(); 
         const userInput = promptInput.value.trim(); 
@@ -242,262 +267,320 @@ Return three components:
 ...all necessary JavaScript code...
 `;
 
-        // Updated fetch to use the Netlify serverless function
-        fetch('/.netlify/functions/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                "model": "google/gemini-2.0-flash-exp:free",
-                "messages": [
-                    { "role": "user", "content": fullPrompt }
-                ]
+        // Updated fetch to use the Netlify serverless function with retry logic
+        const makeApiCall = () => {
+            return fetch('/.netlify/functions/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "model": "google/gemini-2.0-flash-exp:free",
+                    "messages": [
+                        { "role": "user", "content": fullPrompt }
+                    ]
+                })
             })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    let errorDetails = errData.error ? JSON.stringify(errData.error) : JSON.stringify(errData);
-                    if (errData.error && errData.error.message) {
-                        errorDetails = errData.error.message;
-                    } else if (typeof errData.error === 'string') {
-                         errorDetails = errData.error;
+            .then(response => {
+                if (!response.ok) {
+                    // For rate limit errors, provide a more specific message
+                    if (response.status === 429) {
+                        // Try to get the retry-after header
+                        const retryAfter = response.headers.get('retry-after');
+                        const waitTime = retryAfter ? parseInt(retryAfter, 10) : 60;
+                        
+                        // Create an error object with rate limit information
+                        const error = new Error(`Rate limit exceeded. Please try again in ${waitTime} seconds.`);
+                        error.status = 429;
+                        error.retryAfter = waitTime;
+                        
+                        return response.json()
+                            .then(data => {
+                                if (data && data.error) {
+                                    error.message = data.error.message || error.message;
+                                }
+                                throw error;
+                            })
+                            .catch(() => {
+                                throw error;
+                            });
                     }
-                    throw new Error(`Server Function Error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
-                }).catch(() => {
-                    throw new Error(`Server Function Error: ${response.status} ${response.statusText}. Could not parse error response.`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Log the complete API response
-            console.log('Complete API Response:', data);
-            console.log('%c API Response was logged! Check the response in the button below or in your console. ', 'background: #2c3e50; color: white; padding: 5px; border-radius: 3px; font-weight: bold;');
-
-            if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-                let rawContent = data.choices[0].message.content;
-                
-                // Also log the raw content extracted from the response
-                console.log('Raw Content from API:', rawContent);
-                
-                // Store the API response content for display and copy
-                const apiResponseElement = document.getElementById('api-response-content');
-                if (apiResponseElement) {
-                    // Store the raw content in a data attribute for copying
-                    apiResponseElement.setAttribute('data-raw-content', rawContent);
-
-                    // Format the response with section highlighting
-                    let formattedContent = rawContent;
                     
-                    // Highlight HTML section
-                    formattedContent = formattedContent.replace(
-                        /---HTML---\s*([\s\S]*?)(?=---CSS---|---JAVASCRIPT---|$)/i,
-                        '<div class="html-section"><strong>---HTML---</strong>$1</div>'
-                    );
-                    
-                    // Highlight CSS section
-                    formattedContent = formattedContent.replace(
-                        /---CSS---\s*([\s\S]*?)(?=---JAVASCRIPT---|$)/i,
-                        '<div class="css-section"><strong>---CSS---</strong>$1</div>'
-                    );
-                    
-                    // Highlight JavaScript section
-                    formattedContent = formattedContent.replace(
-                        /---JAVASCRIPT---\s*([\s\S]*?)(?=$)/i,
-                        '<div class="javascript-section"><strong>---JAVASCRIPT---</strong>$1</div>'
-                    );
-                    
-                    apiResponseElement.innerHTML = formattedContent;
+                    return response.json().then(errData => {
+                        let errorDetails = "Unknown error occurred";
+                        
+                        if (errData.error) {
+                            if (typeof errData.error === 'string') {
+                                errorDetails = errData.error;
+                            } else if (errData.error.message) {
+                                errorDetails = errData.error.message;
+                            } else {
+                                errorDetails = JSON.stringify(errData.error);
+                            }
+                        } else {
+                            errorDetails = JSON.stringify(errData);
+                        }
+                        
+                        const error = new Error(`Server Function Error: ${response.status}. Details: ${errorDetails}`);
+                        error.status = response.status;
+                        throw error;
+                    }).catch(e => {
+                        if (e.status) throw e;
+                        const error = new Error(`Server Function Error: ${response.status}. Could not parse error response.`);
+                        error.status = response.status;
+                        throw error;
+                    });
                 }
-                
-                // Process the API response
-                const combinedHtml = processApiResponse(rawContent);
-                
-                if (!combinedHtml) {
-                    throw new Error('Failed to process the generated content');
-                }
-                
-                // Add loading animation with improved UI for preview generation
-                resultsContainer.innerHTML = `
-                    <div class="card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Generated Website</h5>
-                            <div class="btn-group">
-                                <button id="view-preview-button" class="btn btn-primary">
-                                    <i class="fas fa-external-link-alt mr-2"></i>Open Preview
-                                </button>
-                                <button id="refresh-preview-button" class="btn btn-outline-secondary ml-2">
-                                    <i class="fas fa-sync-alt mr-2"></i>Refresh
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="preview-spinner">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Loading preview...</span>
-                                </div>
-                                <p class="mt-2">Preparing your website preview...</p>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col-md-4 mb-2 mb-md-0">
-                                    <button id="download-html-button" class="btn btn-outline-success btn-block">
-                                        <i class="fas fa-download mr-2"></i>HTML
+                return response.json();
+            });
+        };
+
+        // Use the backoff retry for the API call
+        backoffRetry(makeApiCall, 3, 2000)
+            .then(data => {
+                // Log the complete API response
+                console.log('Complete API Response:', data);
+                console.log('%c API Response was logged! Check the response in the button below or in your console. ', 'background: #2c3e50; color: white; padding: 5px; border-radius: 3px; font-weight: bold;');
+
+                if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                    let rawContent = data.choices[0].message.content;
+                    
+                    // Also log the raw content extracted from the response
+                    console.log('Raw Content from API:', rawContent);
+                    
+                    // Store the API response content for display and copy
+                    const apiResponseElement = document.getElementById('api-response-content');
+                    if (apiResponseElement) {
+                        // Store the raw content in a data attribute for copying
+                        apiResponseElement.setAttribute('data-raw-content', rawContent);
+
+                        // Format the response with section highlighting
+                        let formattedContent = rawContent;
+                        
+                        // Highlight HTML section
+                        formattedContent = formattedContent.replace(
+                            /---HTML---\s*([\s\S]*?)(?=---CSS---|---JAVASCRIPT---|$)/i,
+                            '<div class="html-section"><strong>---HTML---</strong>$1</div>'
+                        );
+                        
+                        // Highlight CSS section
+                        formattedContent = formattedContent.replace(
+                            /---CSS---\s*([\s\S]*?)(?=---JAVASCRIPT---|$)/i,
+                            '<div class="css-section"><strong>---CSS---</strong>$1</div>'
+                        );
+                        
+                        // Highlight JavaScript section
+                        formattedContent = formattedContent.replace(
+                            /---JAVASCRIPT---\s*([\s\S]*?)(?=$)/i,
+                            '<div class="javascript-section"><strong>---JAVASCRIPT---</strong>$1</div>'
+                        );
+                        
+                        apiResponseElement.innerHTML = formattedContent;
+                    }
+                    
+                    // Process the API response
+                    const combinedHtml = processApiResponse(rawContent);
+                    
+                    if (!combinedHtml) {
+                        throw new Error('Failed to process the generated content');
+                    }
+                    
+                    // Add loading animation with improved UI for preview generation
+                    resultsContainer.innerHTML = `
+                        <div class="card shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Generated Website</h5>
+                                <div class="btn-group">
+                                    <button id="view-preview-button" class="btn btn-primary">
+                                        <i class="fas fa-external-link-alt mr-2"></i>Open Preview
+                                    </button>
+                                    <button id="refresh-preview-button" class="btn btn-outline-secondary ml-2">
+                                        <i class="fas fa-sync-alt mr-2"></i>Refresh
                                     </button>
                                 </div>
-                                <div class="col-md-4 mb-2 mb-md-0">
-                                    <button id="download-css-button" class="btn btn-outline-info btn-block">
-                                        <i class="fas fa-download mr-2"></i>CSS
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="preview-spinner">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading preview...</span>
+                                    </div>
+                                    <p class="mt-2">Preparing your website preview...</p>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-4 mb-2 mb-md-0">
+                                        <button id="download-html-button" class="btn btn-outline-success btn-block">
+                                            <i class="fas fa-download mr-2"></i>HTML
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4 mb-2 mb-md-0">
+                                        <button id="download-css-button" class="btn btn-outline-info btn-block">
+                                            <i class="fas fa-download mr-2"></i>CSS
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button id="download-js-button" class="btn btn-outline-warning btn-block">
+                                            <i class="fas fa-download mr-2"></i>JavaScript
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button id="download-all-button" class="btn btn-success btn-block">
+                                        <i class="fas fa-download mr-2"></i>Download Complete Website
                                     </button>
                                 </div>
-                                <div class="col-md-4">
-                                    <button id="download-js-button" class="btn btn-outline-warning btn-block">
-                                        <i class="fas fa-download mr-2"></i>JavaScript
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="tailwind-switch">
+                                        <label class="custom-control-label" for="tailwind-switch">Use Tailwind CSS</label>
+                                    </div>
+                                    <button id="apply-tailwind-button" class="btn btn-sm btn-outline-primary">
+                                        Apply Changes
                                     </button>
                                 </div>
-                            </div>
-                            <div class="mt-3">
-                                <button id="download-all-button" class="btn btn-success btn-block">
-                                    <i class="fas fa-download mr-2"></i>Download Complete Website
-                                </button>
-                            </div>
-                            <div class="mt-3 d-flex justify-content-between align-items-center">
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="tailwind-switch">
-                                    <label class="custom-control-label" for="tailwind-switch">Use Tailwind CSS</label>
-                                </div>
-                                <button id="apply-tailwind-button" class="btn btn-sm btn-outline-primary">
-                                    Apply Changes
-                                </button>
-                            </div>
-                            <div class="mt-3">
-                                <button id="toggle-api-response" class="btn btn-outline-secondary btn-block">
-                                    <i class="fas fa-code mr-2"></i>Show/Hide API Response
-                                </button>
-                                <div id="api-response-container" class="mt-3" style="display: none;">
-                                    <div class="card bg-light">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <span>API Response</span>
-                                            <button id="copy-api-response" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-copy mr-1"></i>Copy to Clipboard
-                            </button>
-                                        </div>
-                                        <div class="card-body">
-                                            <pre id="api-response-content" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;"></pre>
+                                <div class="mt-3">
+                                    <button id="toggle-api-response" class="btn btn-outline-secondary btn-block">
+                                        <i class="fas fa-code mr-2"></i>Show/Hide API Response
+                                    </button>
+                                    <div id="api-response-container" class="mt-3" style="display: none;">
+                                        <div class="card bg-light">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <span>API Response</span>
+                                                <button id="copy-api-response" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-copy mr-1"></i>Copy to Clipboard
+                                        </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <pre id="api-response-content" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;"></pre>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                
-                // Set the Tailwind switch to the current state
-                const tailwindSwitch = document.getElementById('tailwind-switch');
-                if (tailwindSwitch) {
-                    tailwindSwitch.checked = useTailwindCss;
-                }
-                
-                // Add animation for the preview with enhanced user feedback
-                setTimeout(() => {
-                    const previewSpinner = document.querySelector('.preview-spinner');
-                    if (previewSpinner) {
-                        previewSpinner.innerHTML = `
-                            <div class="preview-ready">
-                                <p class="text-success mb-3"><i class="fas fa-check-circle mr-2"></i>Preview ready!</p>
-                                <div class="preview-actions mb-3">
-                                    <button id="inline-preview-button" class="btn btn-sm btn-outline-primary mr-2">
-                                        <i class="fas fa-eye mr-1"></i>Quick Preview
-                                    </button>
-                                    <button id="spin-preview-button" class="btn btn-sm btn-outline-info">
-                                        <i class="fas fa-sync-alt mr-1"></i>Spin Preview
-                                    </button>
+                    `;
+                    
+                    // Set the Tailwind switch to the current state
+                    const tailwindSwitch = document.getElementById('tailwind-switch');
+                    if (tailwindSwitch) {
+                        tailwindSwitch.checked = useTailwindCss;
+                    }
+                    
+                    // Add animation for the preview with enhanced user feedback
+                    setTimeout(() => {
+                        const previewSpinner = document.querySelector('.preview-spinner');
+                        if (previewSpinner) {
+                            previewSpinner.innerHTML = `
+                                <div class="preview-ready">
+                                    <p class="text-success mb-3"><i class="fas fa-check-circle mr-2"></i>Preview ready!</p>
+                                    <div class="preview-actions mb-3">
+                                        <button id="inline-preview-button" class="btn btn-sm btn-outline-primary mr-2">
+                                            <i class="fas fa-eye mr-1"></i>Quick Preview
+                                        </button>
+                                        <button id="spin-preview-button" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-sync-alt mr-1"></i>Spin Preview
+                                        </button>
+                                    </div>
+                                    <div id="quick-preview-container" style="display: none; width: 100%; height: 300px; overflow: hidden; border-radius: 8px; border: 1px solid var(--color-border); margin-top: 15px;"></div>
                                 </div>
-                                <div id="quick-preview-container" style="display: none; width: 100%; height: 300px; overflow: hidden; border-radius: 8px; border: 1px solid var(--color-border); margin-top: 15px;"></div>
-                            </div>
-                        `;
-                        
-                        // Add event listener for the inline preview button
-                        const inlinePreviewButton = document.getElementById('inline-preview-button');
-                        if (inlinePreviewButton) {
-                            inlinePreviewButton.addEventListener('click', () => {
-                                const previewContainer = document.getElementById('quick-preview-container');
-                                if (previewContainer) {
-                                    if (previewContainer.style.display === 'none') {
-                                        previewContainer.style.display = 'block';
-                                        previewContainer.innerHTML = `<iframe srcdoc="${combinedHtml.replace(/"/g, '&quot;')}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-                                        inlinePreviewButton.innerHTML = `<i class="fas fa-eye-slash mr-1"></i>Hide Preview`;
-                                    } else {
-                                        previewContainer.style.display = 'none';
-                                        previewContainer.innerHTML = '';
-                                        inlinePreviewButton.innerHTML = `<i class="fas fa-eye mr-1"></i>Quick Preview`;
+                            `;
+                            
+                            // Add event listener for the inline preview button
+                            const inlinePreviewButton = document.getElementById('inline-preview-button');
+                            if (inlinePreviewButton) {
+                                inlinePreviewButton.addEventListener('click', () => {
+                                    const previewContainer = document.getElementById('quick-preview-container');
+                                    if (previewContainer) {
+                                        if (previewContainer.style.display === 'none') {
+                                            previewContainer.style.display = 'block';
+                                            previewContainer.innerHTML = `<iframe srcdoc="${combinedHtml.replace(/"/g, '&quot;')}" style="width: 100%; height: 100%; border: none;"></iframe>`;
+                                            inlinePreviewButton.innerHTML = `<i class="fas fa-eye-slash mr-1"></i>Hide Preview`;
+                                        } else {
+                                            previewContainer.style.display = 'none';
+                                            previewContainer.innerHTML = '';
+                                            inlinePreviewButton.innerHTML = `<i class="fas fa-eye mr-1"></i>Quick Preview`;
+                                        }
                                     }
-                                }
-                            });
-                        }
-                        
-                        // Add event listener for the spin preview button
-                        const spinPreviewButton = document.getElementById('spin-preview-button');
-                        if (spinPreviewButton) {
-                            spinPreviewButton.addEventListener('click', () => {
-                                const previewContainer = document.getElementById('quick-preview-container');
-                                if (previewContainer) {
-                                    previewContainer.style.display = 'block';
-                                    // Create animation effect
-                                    previewContainer.innerHTML = `
-                                        <div class="spin-preview-animation">
-                                            <div class="spinner-grow text-primary" role="status">
-                                                <span class="sr-only">Loading...</span>
-                                            </div>
-                                        </div>
-                                    `;
-                                    
-                                    // After animation, show the iframe with rotation effect
-                                    setTimeout(() => {
+                                });
+                            }
+                            
+                            // Add event listener for the spin preview button
+                            const spinPreviewButton = document.getElementById('spin-preview-button');
+                            if (spinPreviewButton) {
+                                spinPreviewButton.addEventListener('click', () => {
+                                    const previewContainer = document.getElementById('quick-preview-container');
+                                    if (previewContainer) {
+                                        previewContainer.style.display = 'block';
+                                        // Create animation effect
                                         previewContainer.innerHTML = `
-                                            <div class="spin-preview-wrapper">
-                                                <iframe srcdoc="${combinedHtml.replace(/"/g, '&quot;')}" 
-                                                        style="width: 100%; height: 100%; border: none; 
-                                                        transform-origin: center; animation: spinPreview 1s ease-out;"></iframe>
+                                            <div class="spin-preview-animation">
+                                                <div class="spinner-grow text-primary" role="status">
+                                                    <span class="sr-only">Loading...</span>
+                                                </div>
                                             </div>
                                         `;
-                                        inlinePreviewButton.innerHTML = `<i class="fas fa-eye-slash mr-1"></i>Hide Preview`;
-                                    }, 800);
-                                }
-                            });
+                                        
+                                        // After animation, show the iframe with rotation effect
+                                        setTimeout(() => {
+                                            previewContainer.innerHTML = `
+                                                <div class="spin-preview-wrapper">
+                                                    <iframe srcdoc="${combinedHtml.replace(/"/g, '&quot;')}" 
+                                                            style="width: 100%; height: 100%; border: none; 
+                                                            transform-origin: center; animation: spinPreview 1s ease-out;"></iframe>
+                                                </div>
+                                            `;
+                                            inlinePreviewButton.innerHTML = `<i class="fas fa-eye-slash mr-1"></i>Hide Preview`;
+                                        }, 800);
+                                    }
+                                });
+                            }
                         }
-                    }
-                }, 1500);
-            } else if (data.error) {
-                console.error("OpenRouter API Error (via Netlify):", data.error);
-                currentGeneratedHtml = null;
-                currentGeneratedCss = null;
-                currentGeneratedJs = null;
-                throw new Error(`OpenRouter API Error: ${data.error.message || JSON.stringify(data.error)}`);
-            }
-            else {
-                console.error("Unexpected API response structure (via Netlify):", data);
+                    }, 1500);
+                } else if (data.error) {
+                    console.error("OpenRouter API Error (via Netlify):", data.error);
+                    currentGeneratedHtml = null;
+                    currentGeneratedCss = null;
+                    currentGeneratedJs = null;
+                    throw new Error(`OpenRouter API Error: ${data.error.message || JSON.stringify(data.error)}`);
+                }
+                else {
+                    console.error("Unexpected API response structure (via Netlify):", data);
+                    currentGeneratedHtml = null; 
+                    currentGeneratedCss = null;
+                    currentGeneratedJs = null;
+                    throw new Error("Unexpected API response structure from server. Could not find generated content.");
+                }
+            })
+            .catch(error => {
+                console.error('Error during API call via Netlify function:', error);
                 currentGeneratedHtml = null; 
                 currentGeneratedCss = null;
                 currentGeneratedJs = null;
-                throw new Error("Unexpected API response structure from server. Could not find generated content.");
-            }
-        })
-        .catch(error => {
-            console.error('Error during API call via Netlify function:', error);
-            currentGeneratedHtml = null; 
-            currentGeneratedCss = null;
-            currentGeneratedJs = null;
-            resultsContainer.innerHTML = `<div class="alert alert-danger" role="alert">Error generating website: ${error.message}</div>`;
-        })
-        .finally(() => {
-            loadingProgressContainer.style.display = 'none';
-            generateButton.disabled = false;
-            generateButton.textContent = originalButtonText;
-        });
+                
+                // Show user-friendly error message
+                let errorMessage = error.message;
+                
+                // For rate limit errors, provide a more helpful message
+                if (error.status === 429) {
+                    const waitTime = error.retryAfter || 60;
+                    errorMessage = `
+                        <p>We're experiencing high demand right now. Please try again in ${waitTime} seconds.</p>
+                        <p class="small text-muted">This helps ensure fair usage of our AI service for all users.</p>
+                    `;
+                }
+                
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">Error generating website</h4>
+                        ${errorMessage}
+                    </div>`;
+            })
+            .finally(() => {
+                loadingProgressContainer.style.display = 'none';
+                generateButton.disabled = false;
+                generateButton.textContent = originalButtonText;
+            });
     });
 
     // Event delegation for dynamically created buttons
@@ -706,7 +789,7 @@ Return three components:
                     previewContainer.style.display = 'block';
                     previewContainer.innerHTML = `<iframe srcdoc="${combinedHtml.replace(/"/g, '&quot;')}" style="width: 100%; height: 100%; border: none;"></iframe>`;
                     button.innerHTML = `<i class="fas fa-eye-slash mr-1"></i>Hide Preview`;
-            } else {
+                } else {
                     previewContainer.style.display = 'none';
                     previewContainer.innerHTML = '';
                     button.innerHTML = `<i class="fas fa-eye mr-1"></i>Quick Preview`;
