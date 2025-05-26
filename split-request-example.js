@@ -59,7 +59,7 @@ async function callNetlifyFunction(prompt) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      "model": "mistralai/devstral-small:free",
+      "model": "google/gemini-2.0-flash-exp:free",
       "messages": [
         { "role": "user", "content": prompt }
       ]

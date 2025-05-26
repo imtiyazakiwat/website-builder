@@ -24,7 +24,7 @@ async function callLanguageModel(prompt) {
         'Authorization': `Bearer ${getSecureApiKey()}` 
       },
       body: JSON.stringify({
-        "model": "mistralai/devstral-small:free",
+        "model": "google/gemini-2.0-flash-exp:free",
         "messages": [
           { "role": "user", "content": prompt }
         ]
