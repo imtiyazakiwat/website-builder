@@ -1,4 +1,4 @@
-# Website Builder Tool
+# Website Builder
 
 This is a simple tool for building websites using the power of OpenAI GPT-3.5. It takes user input for the website's description and generates HTML, CSS, and Bootstrap code to create a template for the website.
 
