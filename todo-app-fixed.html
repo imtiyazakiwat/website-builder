@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern To-Do App</title>
+  <style>
+    /* Custom variables */
+    :root {
+      --main-color: #34495E;
+      --secondary-color: #E5E7EB;
+      --bg-color: #F2F3F6;
+      --text-color: #292B36;
+      --hover-color: #4F5B6B;
+      --shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    /* Headings */
+    h1 {
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 2rem;
+      padding: 2rem;
+      color: var(--main-color);
+    }
+    
+    /* Main */
+    main {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      grid-gap: 1rem;
+    }
+    
+    #todo-list {
+      list-style-type: none;
+      padding: 0;
+      /* Neumorphism effect */
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background-color: var(--secondary-color);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    
+    #todo-list li {
+      padding: 1rem;
+      background-color: var(--bg-color);
+      transition: background-color 0.3s ease;
+      border-bottom: 1px solid var(--secondary-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    #todo-list li:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    #todo-list li:nth-child(odd) {
+      background-color: var(--secondary-color);
+    }
+    
+    #todo-list li:nth-child(odd):hover {
+      background-color: #d8dbe0;
+    }
+    
+    #todo-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+    
+    /* Task input */
+    #add-task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: var(--secondary-color);
+      box-shadow: var(--shadow);
+    }
+    
+    #task-input {
+      flex-grow: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 0.5rem 0 0 0.5rem;
+      box-shadow: var(--shadow);
+      font-size: 1rem;
+    }
+    
+    #task-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--main-color);
+    }
+    
+    #add-btn {
+      background-color: var(--main-color);
+      color: white;
+      border: none;
+      border-radius: 0 0.5rem 0.5rem 0;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    
+    #add-btn:hover {
+      background-color: var(--hover-color);
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1rem;
+      color: var(--text-color);
+      font-size: 0.9rem;
+    }
+    
+    /* Animation for new tasks */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .new-task {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsiveness */
+    @media (max-width: 600px) {
+      main {
+        grid-template-rows: auto 1fr;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+        padding: 1rem;
+      }
+      
+      #add-btn {
+        padding: 0.75rem 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>My To-Do App</h1>
+  </header>
+  <main>
+    <section>
+      <ul id="todo-list">
+        <!-- Tasks will be added here by JavaScript -->
+      </ul>
+    </section>
+    <section id="add-task">
+      <input type="text" id="task-input" placeholder="Add a new task" required>
+      <button id="add-btn">Add Task</button>
+    </section>
+  </main>
+  <footer>
+    <p>Created by Web Designer | © 2024</p>
+  </footer>
+
+  <script>
+    (function() {
+      const todoList = document.getElementById('todo-list');
+      const taskInput = document.getElementById('task-input');
+      const addBtn = document.getElementById('add-btn');
+
+      // List of to-do tasks
+      let tasks = [];
+
+      // Function to save tasks
+      function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      }
+
+      // Function to load tasks
+      function loadTasks() {
+        const savedTasks = localStorage.getItem('tasks');
+        if (savedTasks) {
+          tasks = JSON.parse(savedTasks);
+          renderTasks();
+        }
+      }
+
+      // Function to add a new task to the list
+      function addTask() {
+        const taskText = taskInput.value.trim();
+        if (!taskText) return;
+
+        tasks.push(taskText);
+        saveTasks();
+        renderTasks();
+        
+        taskInput.value = '';
+        taskInput.focus();
+      }
+
+      // Function to delete a task
+      function deleteTask(index) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+      }
+
+      // Function to render tasks on the screen
+      function renderTasks() {
+        todoList.innerHTML = '';
+        
+        if (tasks.length === 0) {
+          const emptyMessage = document.createElement('li');
+          emptyMessage.textContent = 'No tasks yet. Add a task to get started!';
+          emptyMessage.style.textAlign = 'center';
+          emptyMessage.style.color = '#666';
+          todoList.appendChild(emptyMessage);
+          return;
+        }
+        
+        tasks.forEach((task, index) => {
+          const taskItem = document.createElement('li');
+          taskItem.className = 'new-task';
+          
+          const taskText = document.createElement('span');
+          taskText.textContent = task;
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.className = 'delete-btn';
+          deleteBtn.addEventListener('click', () => deleteTask(index));
+          
+          taskItem.appendChild(taskText);
+          taskItem.appendChild(deleteBtn);
+          todoList.appendChild(taskItem);
+        });
+      }
+
+      // Event listeners
+      taskInput.addEventListener('keypress', event => {
+        if (event.key === 'Enter') {
+          addTask();
+        }
+      });
+
+      addBtn.addEventListener('click', addTask);
+
+      // Initial setup
+      loadTasks();
+    })();
+  </script>
+</body>
+
+</html> 

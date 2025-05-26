@@ -567,4 +567,331 @@ body.dark-mode .contact-details-section .contact-detail-item a.text-muted:hover 
     color: var(--color-primary) !important;
 }
 
+/* Preview spinner and loading animation */
+.preview-spinner {
+    padding: 30px;
+    text-align: center;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Button hover effects */
+.btn-outline-success:hover,
+.btn-outline-info:hover,
+.btn-outline-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.btn-primary, .btn-success {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-primary:after, .btn-success:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+}
+
+.btn-primary:hover:after, .btn-success:hover:after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* Card styling */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: none;
+    padding: 1rem 1.25rem;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: none;
+    padding: 1rem 1.25rem;
+}
+
+/* New tab preview button */
+#view-preview-button {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#view-preview-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Success message styling */
+.text-success {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Download buttons */
+.btn-block {
+    border-radius: 5px;
+    padding: 0.6rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#download-all-button {
+    border-radius: 5px;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#download-all-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Dark mode adjustments */
+.dark-mode .card {
+    background-color: #2a2a2a;
+    border-color: #3a3a3a;
+}
+
+.dark-mode .card-header,
+.dark-mode .card-footer {
+    background-color: #333;
+    border-color: #3a3a3a;
+}
+
+.dark-mode .preview-spinner {
+    color: #f8f9fa;
+}
+
+.dark-mode .btn-outline-success,
+.dark-mode .btn-outline-info,
+.dark-mode .btn-outline-warning {
+    color: #f8f9fa;
+}
+
+/* Animation for preview ready text */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.text-success,
+.preview-spinner p {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Spin Preview Animation */
+@keyframes spinPreview {
+    0% {
+        transform: perspective(1000px) rotateY(90deg);
+        opacity: 0;
+    }
+    100% {
+        transform: perspective(1000px) rotateY(0);
+        opacity: 1;
+    }
+}
+
+.spin-preview-wrapper {
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+    overflow: hidden;
+}
+
+.spin-preview-animation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+/* Preview container enhancements */
+#quick-preview-container {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+}
+
+#quick-preview-container:hover {
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Preview buttons styling */
+.preview-actions .btn {
+    transition: all 0.3s ease;
+}
+
+.preview-actions .btn:hover {
+    transform: translateY(-2px);
+}
+
+.preview-actions .btn-outline-primary:hover {
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+}
+
+.preview-actions .btn-outline-info:hover {
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.2);
+}
+
+/* Preview ready animation */
+.preview-ready {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Refresh button styling */
+#refresh-preview-button {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#refresh-preview-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.2);
+}
+
+/* Dark mode adjustments for preview */
+.dark-mode #quick-preview-container {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    border-color: #3a3a3a;
+}
+
+.dark-mode .preview-actions .btn-outline-primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.dark-mode .preview-actions .btn-outline-info {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* API Response Container Styling */
+#api-response-container {
+    transition: all 0.3s ease;
+}
+
+#api-response-content {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+#copy-api-response {
+    transition: all 0.3s ease;
+}
+
+#copy-api-response:hover {
+    background-color: var(--color-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Dark mode styling for API response */
+body.dark-mode #api-response-content {
+    background-color: #2a2a2a;
+    border-color: #3a3a3a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .card.bg-light {
+    background-color: #333 !important;
+    border-color: #444;
+}
+
+body.dark-mode .card.bg-light .card-header {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+/* Code sections styling */
+.html-section,
+.css-section,
+.javascript-section {
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+
+.html-section {
+    background-color: rgba(255, 235, 205, 0.2);
+    border-left: 4px solid #f0ad4e;
+}
+
+.css-section {
+    background-color: rgba(217, 237, 247, 0.2);
+    border-left: 4px solid #5bc0de;
+}
+
+.javascript-section {
+    background-color: rgba(223, 240, 216, 0.2);
+    border-left: 4px solid #5cb85c;
+}
+
+/* Dark mode for code sections */
+body.dark-mode .html-section {
+    background-color: rgba(240, 173, 78, 0.1);
+}
+
+body.dark-mode .css-section {
+    background-color: rgba(91, 192, 222, 0.1);
+}
+
+body.dark-mode .javascript-section {
+    background-color: rgba(92, 184, 92, 0.1);
+}
+
 ```
